@@ -32,4 +32,6 @@ dependencies {
     compile 'com.android.support:design:23.2.0'
     compile 'com.android.support:support-v4:23.2.0'
     compile 'com.android.support:recyclerview-v7:23.2.0'
+    compile 'com.lorentzos.swipecards:library:1.0.9@aar'
+    compile 'com.jakewharton:butterknife:6.1.0'
 }
