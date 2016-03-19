@@ -56,6 +56,9 @@ public class MainActivity extends AppCompatActivity {
                 logUserIn();
             }
         });
+
+        Intent intent = new Intent(MainActivity.this, DrawerActivity.class);
+        startActivity(intent);
     }
     private void registerUser() {
         Log.d("LogMain", "" + emailText.getText());
