@@ -90,7 +90,7 @@ public class DrawerActivity extends AppCompatActivity
 
         Class fragmentClass;
         if (id == R.id.nav_tinder) {
-            fragmentClass = TinderFragment.class;
+            fragmentClass = TinderActivity.class;
         } else if (id == R.id.nav_matches) {
             fragmentClass = MatchesFragment.class;
         } else if (id == R.id.nav_profile) {
