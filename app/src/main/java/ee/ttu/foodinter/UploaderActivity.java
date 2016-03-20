@@ -1,41 +1,65 @@
 package ee.ttu.foodinter;
 
+import android.Manifest;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.location.Location;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.provider.MediaStore;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.util.Base64;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.Toast;
 
 import com.firebase.client.DataSnapshot;
 import com.firebase.client.Firebase;
 import com.firebase.client.FirebaseError;
 import com.firebase.client.ValueEventListener;
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.location.LocationServices;
+
+import java.io.IOException;
+import java.util.List;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
+import ee.ttu.foodinter.request.HttpManager;
+import ee.ttu.foodinter.request.JSONParser;
+import ee.ttu.foodinter.request.RequestPackage;
 
 /**
  * Created by kmm on 20.03.2016.
  */
-public class UploaderActivity extends Fragment {
+public class UploaderActivity extends Fragment implements
+        GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener{
     private static final int REQUEST_CAMERA = 1;
     private static final int SELECT_FILE = 2;
     private ImageView preview;
     private Firebase firebase;
     private int RESULT_OK = -1;
     @Bind(R.id.upload_image) Button button1;
+    private GoogleApiClient mGoogleApiClient;
+    private Location mLastLocation;
+    private String mLatitudeText;
+    private String mLongitudeText;
+    private String strJson = "";
+    Bitmap image;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -78,6 +102,14 @@ public class UploaderActivity extends Fragment {
 
             }
         });
+        if (mGoogleApiClient == null) {
+            mGoogleApiClient = new GoogleApiClient.Builder(view.getContext())
+                    .addConnectionCallbacks(this)
+                    .addOnConnectionFailedListener(this)
+                    .addApi(LocationServices.API)
+                    .build();
+        }
+
         return view;
     }
 
@@ -87,15 +119,6 @@ public class UploaderActivity extends Fragment {
         byte[] decodedString = Base64.decode(encodedImage, Base64.DEFAULT);
         imageBitmap = BitmapFactory.decodeByteArray(decodedString, 0, decodedString.length);
         preview.setImageBitmap(imageBitmap);
-    }
-
-    private void uploadPhoto(Bitmap image) {
-        FoodCard foodCard = new FoodCard(FoodConfiguration.USER_ID, image);
-        firebase.child("FoodCards").push().setValue(foodCard);
-    }
-
-    private void showListOfRestos() {
-
     }
 
     public void chooseImage(View view) {
@@ -130,17 +153,98 @@ public class UploaderActivity extends Fragment {
         super.onActivityResult(requestCode, resultCode, data);
         if (resultCode == RESULT_OK) {
             if (requestCode == REQUEST_CAMERA) {
-                Bitmap image = (Bitmap) data.getExtras().get("data");
+                image = (Bitmap) data.getExtras().get("data");
                 //preview.setImageBitmap(image);
-                uploadPhoto(image);
+                addImageToDatabaseWithInfo();
             } else if (requestCode == SELECT_FILE) {
                 Uri selectImageUri = data.getData();
                 String imagePath = getRealPathFromUri(selectImageUri);
-                Bitmap image = BitmapFactory.decodeFile(imagePath);
+                image = BitmapFactory.decodeFile(imagePath);
                 //preview.setImageBitmap(image);
-                uploadPhoto(image);
+                addImageToDatabaseWithInfo();
             }
         }
+    }
+
+    private void addImageToDatabaseWithInfo() {
+        getLocation();
+        try {
+            getNearbyPlaces();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void showListOfPlaces(final List<FoodPlace> places) {
+        final String noPlaceString = "This place does not exist here.";
+        int size = places.size();
+        final String[] placeNames = new String[size +1];
+
+        for (int i = 0; i < size; i++) {
+            placeNames[i] = places.get(i).getName();
+        }
+        placeNames[size]= noPlaceString;
+
+        View view = getView();
+        AlertDialog.Builder builder = new AlertDialog.Builder(view.getContext());
+        builder.setTitle("Choose place where you are");
+
+        builder.setItems(placeNames, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                Log.d("lammas", ""+placeNames[which]);
+                String description = "";
+                if (placeNames[which].equals(noPlaceString)) {
+                    getPlaceDescription();
+                } else {
+                    FoodPlace place =  places.get(which);
+                    description = "Info: "+place.getLocation()+"/n"
+                            +place.getCategory()+"/n"
+                            +place.getUrl()+"/n";
+                    uploadPhoto(description, place.getName());
+                }
+            }
+        });
+        builder.show();
+    }
+
+    private void getPlaceDescription() {
+
+    }
+
+    private void uploadPhoto(String description, String name) {
+        FoodCard foodCard = new FoodCard(FoodConfiguration.USER_ID, image, description, name);
+        firebase.child("FoodCards").push().setValue(foodCard);
+    }
+
+    private void getLocation() {
+        onStart();
+        onStop();
+    }
+
+    private void getNearbyPlaces() throws IOException {
+
+        RequestPackage rp = new RequestPackage();
+        rp.setParam("client_id", "WX1K0WOBFIIAXGKP4VIMWO052Y1FSKEHL05SH1IIPKGRFUWK");
+        rp.setParam("client_secret", "CJTH1DZRBJGNC1VSVVDQGLIWEVLDLYG1UL5GOTECKZ3HZULY");
+        rp.setParam("ll", ""+mLatitudeText+","+mLongitudeText);
+        rp.setParam("v", "20130815");
+        rp.setParam("section", "food");
+        rp.setParam("sortByDistance", "1");
+        rp.setUri("https://api.foursquare.com/v2/venues/explore");
+        Task task = new Task();
+        task.execute(rp);
+    }
+
+
+    public void onStart() {
+        mGoogleApiClient.connect();
+        super.onStart();
+    }
+
+    public void onStop() {
+        mGoogleApiClient.disconnect();
+        super.onStop();
     }
 
     private String getRealPathFromUri(Uri contentUri) {
@@ -164,4 +268,59 @@ public class UploaderActivity extends Fragment {
         ButterKnife.unbind(this);
     }
 
+    @Override
+    public void onConnected(@Nullable Bundle bundle) {
+
+        if (ActivityCompat.checkSelfPermission(getView().getContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(getView().getContext(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            // TODO: Consider calling
+            //    ActivityCompat#requestPermissions
+            // here to request the missing permissions, and then overriding
+            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+            //                                          int[] grantResults)
+            // to handle the case where the user grants the permission. See the documentation
+            // for ActivityCompat#requestPermissions for more details.
+            return;
+        }
+        mLastLocation = LocationServices.FusedLocationApi.getLastLocation(
+                mGoogleApiClient);
+        if (mLastLocation != null) {
+            mLatitudeText = String.valueOf(mLastLocation.getLatitude());
+            mLongitudeText = String.valueOf(mLastLocation.getLongitude());
+            Log.d("lammas", "lat: "+mLastLocation.getLatitude()+" lon: "+mLastLocation.getLongitude());
+        }
+        //Toast.makeText(this, "info: "+mLatitudeText +mLongitudeText, Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
+    public void onConnectionSuspended(int i) {
+
+    }
+
+    @Override
+    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
+
+    }
+
+    private class Task extends AsyncTask<RequestPackage, String, String> {
+
+        @Override
+        protected String doInBackground(RequestPackage... params) {
+            String content = HttpManager.getData(params[0]);
+            return content;
+        }
+
+        @Override
+        protected void onPostExecute(String result) {
+            List<FoodPlace> places = null;
+            if(result == null) {
+                Log.d("lammas", "somthing went wrong, got no result");
+                Toast.makeText(getActivity(), "info: did not get any places", Toast.LENGTH_SHORT).show();
+            } else {
+                //Log.d("lammas", result);
+                places = JSONParser.parseItemObjects(result);
+            }
+            showListOfPlaces(places);
+        }
+
+    }
 }

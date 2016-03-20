@@ -11,19 +11,18 @@ import java.io.ByteArrayOutputStream;
 public class FoodCard {
     private String userId;
     private String image; //Base64
-    private String restoName; //Base64
-    private String restoInfo; //Base64
+    private String placeName = "";
+    private String placeInfo = "";
 
-    public FoodCard() {
-
-    }
-    public FoodCard(String userId, Bitmap imageBitmap) {
+    public FoodCard(String userId, Bitmap imageBitmap, String description, String name) {
         this.userId = userId;
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
         imageBitmap.compress(Bitmap.CompressFormat.PNG, 100, byteArrayOutputStream);
         byte[] byteArray = byteArrayOutputStream.toByteArray();
         String imageBase64 = Base64.encodeToString(byteArray, Base64.DEFAULT);
         this.image = imageBase64;
+        placeInfo = description;
+        placeName = name;
     }
 
     public String getImage() {
@@ -42,19 +41,19 @@ public class FoodCard {
         this.userId = userId;
     }
 
-    public String getRestoName() {
-        return restoName;
+    public String getPlaceName() {
+        return placeName;
     }
 
-    public void setRestoName(String restoName) {
-        this.restoName = restoName;
+    public void setPlaceName(String placeName) {
+        this.placeName = placeName;
     }
 
-    public String getRestoInfo() {
-        return restoInfo;
+    public String getPlaceInfo() {
+        return placeInfo;
     }
 
-    public void setRestoInfo(String restoInfo) {
-        this.restoInfo = restoInfo;
+    public void setPlaceInfo(String placeInfo) {
+        this.placeInfo = placeInfo;
     }
 }

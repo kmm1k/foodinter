@@ -144,6 +144,7 @@ public class TinderActivity extends Fragment {
                         break;
                     case "continue swiping":
                         dialog.dismiss();
+                        break;
                     default:
                         dialog.dismiss();
                 }
