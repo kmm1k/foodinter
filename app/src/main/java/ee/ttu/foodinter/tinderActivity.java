@@ -1,6 +1,8 @@
 package ee.ttu.foodinter;
 
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.util.Log;
@@ -14,8 +16,8 @@ import com.lorentzos.flingswipe.SwipeFlingAdapterView;
 
 import java.util.ArrayList;
 
+import butterknife.Bind;
 import butterknife.ButterKnife;
-import butterknife.InjectView;
 import butterknife.OnClick;
 
 
@@ -25,7 +27,7 @@ public class TinderActivity extends Fragment {
     private ArrayAdapter<String> arrayAdapter;
     private int i;
 
-    @InjectView(R.id.frame) SwipeFlingAdapterView flingContainer;
+    @Bind(R.id.frame) SwipeFlingAdapterView flingContainer;
 
 
     @Override
@@ -42,7 +44,7 @@ public class TinderActivity extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.activity_tinder, container, false);
-        ButterKnife.inject(this, view);
+        ButterKnife.bind(this, view);
         al = new ArrayList<>();
         al.add("php");
         al.add("c");
@@ -77,6 +79,7 @@ public class TinderActivity extends Fragment {
             @Override
             public void onRightCardExit(Object dataObject) {
                 //makeToast(TinderActivity.this, "Right!");
+                showAlerBox();
             }
 
             @Override
@@ -123,6 +126,30 @@ public class TinderActivity extends Fragment {
     @OnClick(R.id.left)
     public void left() {
         flingContainer.getTopCardListener().selectLeft();
+    }
+
+
+    private void showAlerBox() {
+        View view = this.getView();
+        final String[] items = {"go to restaurant", "continue swiping"};
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(view.getContext());
+        builder.setTitle("Continue swiping?");
+        builder.setItems(items, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                switch (items[which]) {
+                    case "go to restaurant":
+
+                        break;
+                    case "continue swiping":
+                        dialog.dismiss();
+                    default:
+                        dialog.dismiss();
+                }
+            }
+        });
+        builder.show();
     }
 
 
