@@ -17,12 +17,14 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
+import android.text.InputType;
 import android.util.Base64;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Toast;
 
@@ -154,14 +156,15 @@ public class UploaderActivity extends Fragment implements
         if (resultCode == RESULT_OK) {
             if (requestCode == REQUEST_CAMERA) {
                 image = (Bitmap) data.getExtras().get("data");
-                //preview.setImageBitmap(image);
+                preview.setImageBitmap(image);
                 addImageToDatabaseWithInfo();
             } else if (requestCode == SELECT_FILE) {
                 Uri selectImageUri = data.getData();
                 String imagePath = getRealPathFromUri(selectImageUri);
+                Log.d("lammas", ""+imagePath);
                 image = BitmapFactory.decodeFile(imagePath);
-                //preview.setImageBitmap(image);
-                addImageToDatabaseWithInfo();
+                preview.setImageBitmap(image);
+                //addImageToDatabaseWithInfo();
             }
         }
     }
@@ -209,7 +212,29 @@ public class UploaderActivity extends Fragment implements
     }
 
     private void getPlaceDescription() {
+        final String[] name = {""};
+        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+        builder.setTitle("Insert name of the place.");
 
+        final EditText nameInput = new EditText(getActivity());
+        nameInput.setInputType(InputType.TYPE_CLASS_TEXT );
+        builder.setView(nameInput);
+
+        builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                name[0] = nameInput.getText().toString();
+                uploadPhoto("", name[0]);
+            }
+        });
+        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.cancel();
+            }
+        });
+
+        builder.show();
     }
 
     private void uploadPhoto(String description, String name) {
