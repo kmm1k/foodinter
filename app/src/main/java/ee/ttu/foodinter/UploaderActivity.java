@@ -39,6 +39,7 @@ import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationServices;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 import butterknife.Bind;
@@ -94,13 +95,18 @@ public class UploaderActivity extends Fragment implements
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 int foodCounter = 0;
+                ArrayList<FoodCard> foodCards = new ArrayList<FoodCard>();
                 for (DataSnapshot foodCardSnapshot: dataSnapshot.getChildren()) {
                     FoodCard foodCard = foodCardSnapshot.getValue(FoodCard.class);
+                    foodCards.add(foodCard);
                     Log.d("lammas", foodCard.getPlaceName());
                     foodCounter++;
                 }
-
-                gridview.setAdapter(new ImageAdapter(view.getContext()));
+                Bitmap[] foodPictures = new Bitmap[foodCounter];
+                for (int i = 0; i < foodCounter; i++) {
+                    foodPictures[i] = stringToBitmap(foodCards.get(i).getImage());
+                }
+                gridview.setAdapter(new ImageAdapter(view.getContext(), foodPictures));
                 gridview.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                     public void onItemClick(AdapterView<?> parent, View v,
                                             int position, long id) {
@@ -128,12 +134,12 @@ public class UploaderActivity extends Fragment implements
         return view;
     }
 
-    private void showImage (FoodCard foodCard) {
+    private Bitmap stringToBitmap (String imageString) {
         Bitmap imageBitmap = null;
-        String encodedImage = foodCard.getImage();
-        byte[] decodedString = Base64.decode(encodedImage, Base64.DEFAULT);
+        byte[] decodedString = Base64.decode(imageString, Base64.DEFAULT);
         imageBitmap = BitmapFactory.decodeByteArray(decodedString, 0, decodedString.length);
         //preview.setImageBitmap(imageBitmap);
+        return imageBitmap;
     }
 
     public void chooseImage(View view) {
