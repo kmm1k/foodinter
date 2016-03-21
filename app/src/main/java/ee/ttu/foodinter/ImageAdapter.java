@@ -11,18 +11,18 @@ import android.widget.ImageView;
 public class ImageAdapter extends BaseAdapter {
 
     private Context mContext;
-    private Bitmap[]mis_fotos;
+    private Bitmap[] foodPictures;
 
     public ImageAdapter(Context c) {
         mContext = c;    }
 
-    public ImageAdapter(Context mContext, Bitmap[] mis_fotos) {
+    public ImageAdapter(Context mContext, Bitmap[] foodPictures) {
         this.mContext = mContext;
-        this.mis_fotos = mis_fotos;
+        this.foodPictures = foodPictures;
     }
 
     public int getCount() {
-        return mis_fotos.length;
+        return foodPictures.length;
     }
 
     public Object getItem(int position) {
@@ -41,7 +41,7 @@ public class ImageAdapter extends BaseAdapter {
         } else {
             imageView = (ImageView) convertView;
         }
-        imageView.setImageBitmap(mis_fotos[position]);
+        imageView.setImageBitmap(foodPictures[position]);
         return imageView;
     }
 

@@ -12,4 +12,5 @@ public class FoodConfiguration {
     public static final String FOURSQUARE_BUILT_LINK = FOURSQUARE_LINK
             +"?client_id="+FOURSQUARE_USER_ID
             +"&client_secret="+FOURSQUARE_USER_SECRET;
+    public static FoodUser FOOD_USER;
 }

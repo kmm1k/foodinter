@@ -13,8 +13,6 @@ import android.view.ViewGroup;
 import ee.ttu.foodinter.dummy.DummyContent;
 import ee.ttu.foodinter.dummy.DummyContent.DummyItem;
 
-import java.util.List;
-
 /**
  * A fragment representing a list of Items.
  * <p/>
@@ -59,6 +57,7 @@ public class MatchesFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_matches_list, container, false);
+
 
         // Set the adapter
         if (view instanceof RecyclerView) {

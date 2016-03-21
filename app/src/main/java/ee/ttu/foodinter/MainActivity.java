@@ -1,8 +1,8 @@
 package ee.ttu.foodinter;
 
 import android.content.Intent;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -15,8 +15,7 @@ import com.firebase.client.Firebase;
 import com.firebase.client.FirebaseError;
 import com.firebase.client.ValueEventListener;
 
-import org.w3c.dom.Text;
-
+import java.util.ArrayList;
 import java.util.Map;
 
 public class MainActivity extends AppCompatActivity {
@@ -68,11 +67,32 @@ public class MainActivity extends AppCompatActivity {
                 System.out.println("Successfully created user account with uid: " + stringObjectMap.get("uid"));
                 Log.d("LogMain", "register user");
                 printToast();
+                addFoodUser(""+emailText.getText(), stringObjectMap.get("uid").toString());
             }
 
             @Override
             public void onError(FirebaseError firebaseError) {
                 errorMessages.setText(""+firebaseError);
+                Log.d("LogMain", "" + firebaseError);
+            }
+        });
+    }
+
+    private void addFoodUser(String userName, String uid) {
+        FoodUser foodUser = new FoodUser(userName, uid, new ArrayList());
+        firebase.child("FoodUsers/"+uid).setValue(foodUser);
+    }
+
+    private void getFoodUser(String uid) {
+        Firebase userSnap = firebase.child("FoodUsers/"+uid);
+        userSnap.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                FoodConfiguration.FOOD_USER = dataSnapshot.getValue(FoodUser.class);
+            }
+
+            @Override
+            public void onCancelled(FirebaseError firebaseError) {
                 Log.d("LogMain", "" + firebaseError);
             }
         });
@@ -93,6 +113,7 @@ public class MainActivity extends AppCompatActivity {
             public void onAuthenticated(AuthData authData) {
                 System.out.println("User ID: " + authData.getUid() + ", Provider: " + authData.getProvider());
                 Log.d("LogMain", "log user in");
+                getFoodUser(authData.getUid());
                 showLoggedInView(authData.getUid());
             }
 
