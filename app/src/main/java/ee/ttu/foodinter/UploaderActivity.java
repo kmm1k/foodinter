@@ -94,24 +94,28 @@ public class UploaderActivity extends Fragment implements
         firebase.child("FoodCards").addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                int foodCounter = 0;
-                ArrayList<FoodCard> foodCards = new ArrayList<FoodCard>();
+                final ArrayList<FoodCard> foodCards = new ArrayList<>();
+                final ArrayList<String> foodCardKeys = new ArrayList<>();
+
                 for (DataSnapshot foodCardSnapshot: dataSnapshot.getChildren()) {
                     FoodCard foodCard = foodCardSnapshot.getValue(FoodCard.class);
-                    foodCards.add(foodCard);
-                    Log.d("lammas", foodCard.getPlaceName());
-                    foodCounter++;
+                    Log.d("lammas", foodCardSnapshot.getKey());
+                    if (FoodConfiguration.USER_ID.equals(foodCard.getUserId())){
+                        foodCardKeys.add(foodCardSnapshot.getKey());
+                        foodCards.add(foodCard);
+                    }
                 }
-                Bitmap[] foodPictures = new Bitmap[foodCounter];
-                for (int i = 0; i < foodCounter; i++) {
+                int pictureCount = foodCards.size();
+                Log.d("lammas", ""+pictureCount);
+                Bitmap[] foodPictures = new Bitmap[pictureCount];
+                for (int i = 0; i < pictureCount; i++) {
                     foodPictures[i] = stringToBitmap(foodCards.get(i).getImage());
                 }
                 gridview.setAdapter(new ImageAdapter(view.getContext(), foodPictures));
                 gridview.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                     public void onItemClick(AdapterView<?> parent, View v,
                                             int position, long id) {
-                        Toast.makeText(view.getContext(), "" + position,
-                                Toast.LENGTH_SHORT).show();
+                        deleteImageDialog(foodCardKeys.get(position), foodCards.get(position));
                     }
                 });
             }
@@ -132,6 +136,33 @@ public class UploaderActivity extends Fragment implements
 
 
         return view;
+    }
+
+    private void deleteImageDialog(final String foodCardKey, final FoodCard foodCard) {
+        final String[] items = {"delete food", "cancel"};
+
+
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+        builder.setTitle(foodCard.getPlaceName());
+        builder.setMessage(foodCard.getPlaceInfo())
+                .setPositiveButton(items[1], new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        dialog.dismiss();
+                    }
+                })
+                .setNegativeButton(items[0], new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        firebase.child("FoodCards").child(foodCardKey).removeValue();
+                    }
+                });
+        // Create the AlertDialog object and return it
+        builder.show();
+
+
+    }
+    private void deleteCard() {
+
     }
 
     private Bitmap stringToBitmap (String imageString) {
