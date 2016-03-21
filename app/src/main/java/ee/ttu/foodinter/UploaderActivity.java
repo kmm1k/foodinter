@@ -23,8 +23,10 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.Toast;
 
@@ -54,7 +56,6 @@ public class UploaderActivity extends Fragment implements
     private static final int SELECT_FILE = 2;
     private ImageView preview;
     private Firebase firebase;
-    private int RESULT_OK = -1;
     @Bind(R.id.upload_image) Button button1;
     private GoogleApiClient mGoogleApiClient;
     private Location mLastLocation;
@@ -85,25 +86,36 @@ public class UploaderActivity extends Fragment implements
 
         preview = (ImageView) view.findViewById(R.id.imageView);
         firebase = new Firebase(FoodConfiguration.SERVER_ADDRESS);
-        firebase.child("foodCards").addValueEventListener(new ValueEventListener() {
+        final GridView gridview = (GridView) view.findViewById(R.id.gridview);
+
+
+
+        firebase.child("FoodCards").addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                FoodCard lastFoodCard = null;
+                int foodCounter = 0;
                 for (DataSnapshot foodCardSnapshot: dataSnapshot.getChildren()) {
                     FoodCard foodCard = foodCardSnapshot.getValue(FoodCard.class);
-                    showImage(foodCard);
-                    lastFoodCard = foodCard;
-                    if (lastFoodCard != null) {
-                        break;
-                    }
+                    Log.d("lammas", foodCard.getPlaceName());
+                    foodCounter++;
                 }
+
+                gridview.setAdapter(new ImageAdapter(view.getContext()));
+                gridview.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                    public void onItemClick(AdapterView<?> parent, View v,
+                                            int position, long id) {
+                        Toast.makeText(view.getContext(), "" + position,
+                                Toast.LENGTH_SHORT).show();
+                    }
+                });
             }
 
             @Override
             public void onCancelled(FirebaseError firebaseError) {
-
+                Log.d("lammas", "failed to get info from db");
             }
         });
+
         if (mGoogleApiClient == null) {
             mGoogleApiClient = new GoogleApiClient.Builder(view.getContext())
                     .addConnectionCallbacks(this)
@@ -111,6 +123,7 @@ public class UploaderActivity extends Fragment implements
                     .addApi(LocationServices.API)
                     .build();
         }
+
 
         return view;
     }
@@ -120,7 +133,7 @@ public class UploaderActivity extends Fragment implements
         String encodedImage = foodCard.getImage();
         byte[] decodedString = Base64.decode(encodedImage, Base64.DEFAULT);
         imageBitmap = BitmapFactory.decodeByteArray(decodedString, 0, decodedString.length);
-        preview.setImageBitmap(imageBitmap);
+        //preview.setImageBitmap(imageBitmap);
     }
 
     public void chooseImage(View view) {
@@ -140,7 +153,7 @@ public class UploaderActivity extends Fragment implements
                     case "choose from library":
                         Intent chooseImageIntent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
                         chooseImageIntent.setType("image/*");
-                        startActivityForResult(Intent.createChooser(chooseImageIntent, "Select file"), SELECT_FILE);
+                        getActivity().startActivityForResult(Intent.createChooser(chooseImageIntent, "Select file"), SELECT_FILE);
                         break;
                     default:
                         dialog.dismiss();
@@ -153,17 +166,17 @@ public class UploaderActivity extends Fragment implements
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (resultCode == RESULT_OK) {
+        if (resultCode == getActivity().RESULT_OK) {
             if (requestCode == REQUEST_CAMERA) {
                 image = (Bitmap) data.getExtras().get("data");
-                preview.setImageBitmap(image);
+                //preview.setImageBitmap(image);
                 addImageToDatabaseWithInfo();
             } else if (requestCode == SELECT_FILE) {
                 Uri selectImageUri = data.getData();
                 String imagePath = getRealPathFromUri(selectImageUri);
                 Log.d("lammas", ""+imagePath);
                 image = BitmapFactory.decodeFile(imagePath);
-                preview.setImageBitmap(image);
+                //preview.setImageBitmap(image);
                 //addImageToDatabaseWithInfo();
             }
         }
@@ -201,9 +214,9 @@ public class UploaderActivity extends Fragment implements
                     getPlaceDescription();
                 } else {
                     FoodPlace place =  places.get(which);
-                    description = "Info: "+place.getLocation()+"/n"
-                            +place.getCategory()+"/n"
-                            +place.getUrl()+"/n";
+                    description = "location: "+place.getLocation()+" cat: "
+                            +place.getCategory()+" url: "
+                            +place.getUrl()+"";
                     uploadPhoto(description, place.getName());
                 }
             }

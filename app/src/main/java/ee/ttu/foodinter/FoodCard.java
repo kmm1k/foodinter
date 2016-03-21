@@ -11,8 +11,8 @@ import java.io.ByteArrayOutputStream;
 public class FoodCard {
     private String userId;
     private String image; //Base64
-    private String placeName = "";
-    private String placeInfo = "";
+    private String placeName;
+    private String placeInfo;
 
     public FoodCard(String userId, Bitmap imageBitmap, String description, String name) {
         this.userId = userId;
@@ -21,8 +21,11 @@ public class FoodCard {
         byte[] byteArray = byteArrayOutputStream.toByteArray();
         String imageBase64 = Base64.encodeToString(byteArray, Base64.DEFAULT);
         this.image = imageBase64;
-        placeInfo = description;
-        placeName = name;
+        this.placeInfo = description;
+        this.placeName = name;
+    }
+
+    public FoodCard() {
     }
 
     public String getImage() {

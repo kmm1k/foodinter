@@ -63,7 +63,7 @@ public class DrawerActivity extends AppCompatActivity
         Fragment fragment = null;
 
 
-        Class fragmentClass = TinderActivity.class;
+        Class fragmentClass = UploaderActivity.class;
         try {
             fragment = (Fragment) fragmentClass.newInstance();
         } catch (Exception e) {
