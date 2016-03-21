@@ -56,8 +56,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        Intent intent = new Intent(MainActivity.this, DrawerActivity.class);
-        startActivity(intent);
+
     }
     private void registerUser() {
         Log.d("LogMain", "" + emailText.getText());
@@ -79,16 +78,19 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void addFoodUser(String userName, String uid) {
-        FoodUser foodUser = new FoodUser(userName, uid, new ArrayList());
+        ArrayList<String> places = new ArrayList<>();
+        places.add("item");
+        FoodUser foodUser = new FoodUser(userName, uid, places);
         firebase.child("FoodUsers/"+uid).setValue(foodUser);
     }
 
-    private void getFoodUser(String uid) {
+    private void getFoodUser(final String uid) {
         Firebase userSnap = firebase.child("FoodUsers/"+uid);
         userSnap.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 FoodConfiguration.FOOD_USER = dataSnapshot.getValue(FoodUser.class);
+                showLoggedInView(uid);
             }
 
             @Override
@@ -114,7 +116,6 @@ public class MainActivity extends AppCompatActivity {
                 System.out.println("User ID: " + authData.getUid() + ", Provider: " + authData.getProvider());
                 Log.d("LogMain", "log user in");
                 getFoodUser(authData.getUid());
-                showLoggedInView(authData.getUid());
             }
 
             @Override

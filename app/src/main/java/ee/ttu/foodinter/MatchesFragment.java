@@ -6,12 +6,10 @@ import android.support.v4.app.Fragment;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-
-import ee.ttu.foodinter.dummy.DummyContent;
-import ee.ttu.foodinter.dummy.DummyContent.DummyItem;
 
 /**
  * A fragment representing a list of Items.
@@ -68,7 +66,8 @@ public class MatchesFragment extends Fragment {
             } else {
                 recyclerView.setLayoutManager(new GridLayoutManager(context, mColumnCount));
             }
-            recyclerView.setAdapter(new MyMatchesRecyclerViewAdapter(DummyContent.ITEMS, mListener));
+            Log.d("lammas", ""+FoodConfiguration.FOOD_USER.getPlaceNames());
+            recyclerView.setAdapter(new MyMatchesRecyclerViewAdapter(FoodConfiguration.FOOD_USER.getPlaceNames(), mListener));
         }
         return view;
     }
@@ -103,6 +102,6 @@ public class MatchesFragment extends Fragment {
      */
     public interface OnListFragmentInteractionListener {
         // TODO: Update argument type and name
-        void onListFragmentInteraction(DummyItem item);
+        void onListFragmentInteraction(String item);
     }
 }

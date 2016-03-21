@@ -21,8 +21,6 @@ import com.google.android.gms.common.api.GoogleApiClient;
 
 import java.text.BreakIterator;
 
-import ee.ttu.foodinter.dummy.DummyContent;
-
 public class DrawerActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener, TinderFragment.OnFragmentInteractionListener,
         MatchesFragment.OnListFragmentInteractionListener{
@@ -146,7 +144,7 @@ public class DrawerActivity extends AppCompatActivity
     }
 
     @Override
-    public void onListFragmentInteraction(DummyContent.DummyItem item) {
+    public void onListFragmentInteraction(String item) {
 
     }
 
