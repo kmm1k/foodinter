@@ -66,6 +66,7 @@ public class MainActivity extends AppCompatActivity {
                 System.out.println("Successfully created user account with uid: " + stringObjectMap.get("uid"));
                 Log.d("LogMain", "register user");
                 printToast();
+                errorMessages.setText("user has been created, please log in.");
                 addFoodUser(""+emailText.getText(), stringObjectMap.get("uid").toString());
             }
 

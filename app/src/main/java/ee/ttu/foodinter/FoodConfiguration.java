@@ -13,4 +13,5 @@ public class FoodConfiguration {
             +"?client_id="+FOURSQUARE_USER_ID
             +"&client_secret="+FOURSQUARE_USER_SECRET;
     public static FoodUser FOOD_USER;
+    public static boolean swiped = false;
 }

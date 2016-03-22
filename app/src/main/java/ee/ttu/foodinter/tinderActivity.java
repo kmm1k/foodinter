@@ -2,6 +2,7 @@ package ee.ttu.foodinter;
 
 import android.app.AlertDialog;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
@@ -37,12 +38,16 @@ public class TinderActivity extends Fragment {
     @Bind(R.id.frame)
     SwipeFlingAdapterView flingContainer;
     private ArrayList<FoodCard> places;
+    private ArrayList<FoodCard> foodCards;
+    private String swipedPlaceName;
+    private boolean swiped = false;
 
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         //setRetainInstance(true);
+        places = new ArrayList<>();
 
 
     }
@@ -72,22 +77,28 @@ public class TinderActivity extends Fragment {
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.activity_tinder, container, false);
         ButterKnife.bind(this, view);
-
+        swipedPlaceName = "";
         firebase = new Firebase("https://foodinter.firebaseio.com/");
         firebase.child("FoodCards").addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                final ArrayList<FoodCard> foodCards = new ArrayList<>();
+                foodCards = new ArrayList<>();
 
                 for (DataSnapshot foodCardSnapshot : dataSnapshot.getChildren()) {
                     FoodCard foodCard = foodCardSnapshot.getValue(FoodCard.class);
                     Log.d("lammas", foodCardSnapshot.getKey());
-                    foodCards.add(foodCard);
+                    //foodCards.add(foodCard);
 
                     //TODO: remove comments when ready
                     if (!FoodConfiguration.USER_ID.equals(foodCard.getUserId())){
                         foodCards.add(foodCard);
                     }
+                }
+                if (FoodConfiguration.swiped) {
+                    FoodConfiguration.swiped = false;
+                    ArrayList<String> localPlaceNames = FoodConfiguration.FOOD_USER.getPlaceNames();
+                        showAlerBox(localPlaceNames.get(localPlaceNames.size()-1));
+
                 }
                 parseFoodCardsIntoPlaces(foodCards);
             }
@@ -135,8 +146,9 @@ public class TinderActivity extends Fragment {
             @Override
             public void onRightCardExit(Object dataObject) {
                 //makeToast(TinderActivity.this, "Right!");
+                FoodConfiguration.swiped = true;
                 addPlace(places.get(i).getPlaceName());
-                showAlerBox();
+
                 i++;
             }
 
@@ -161,7 +173,9 @@ public class TinderActivity extends Fragment {
         flingContainer.setOnItemClickListener(new SwipeFlingAdapterView.OnItemClickListener() {
             @Override
             public void onItemClicked(int itemPosition, Object dataObject) {
-                //makeToast(TinderActivity.this, "Clicked!");
+                Intent intent = new Intent(getActivity(), MatchActivity.class);
+                intent.putExtra("name", places.get(itemPosition).getPlaceName());
+                startActivity(intent);
             }
         });
 
@@ -224,7 +238,7 @@ public class TinderActivity extends Fragment {
             placeNames.add(placeName);
         }
         Log.d("lammas", "place names place added"+placeNames);
-
+        swipedPlaceName = placeName;
         FoodConfiguration.FOOD_USER.setPlaceNames(placeNames);
         firebase.child("FoodUsers/"+FoodConfiguration.FOOD_USER.getUid()).setValue(FoodConfiguration.FOOD_USER);
     }
@@ -235,17 +249,19 @@ public class TinderActivity extends Fragment {
         /**
          * Trigger the right event manually.
          */
+        if (places.size() > 0)
         flingContainer.getTopCardListener().selectRight();
     }
 
     @OnClick(R.id.left)
     public void left() {
+        if (places.size() > 0)
         flingContainer.getTopCardListener().selectLeft();
     }
 
 
 
-    private void showAlerBox() {
+    private void showAlerBox(final String item) {
         View view = this.getView();
         final String[] items = {"go to restaurant", "continue swiping"};
 
@@ -256,7 +272,9 @@ public class TinderActivity extends Fragment {
             public void onClick(DialogInterface dialog, int which) {
                 switch (items[which]) {
                     case "go to restaurant":
-
+                        Intent intent = new Intent(getActivity(), MatchActivity.class);
+                        intent.putExtra("name", item);
+                        startActivity(intent);
                         break;
                     case "continue swiping":
                         dialog.dismiss();

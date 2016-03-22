@@ -35,7 +35,7 @@ public class ImageAdapterMatches extends BaseAdapter {
         ImageView imageView;
         if (convertView == null) {
             imageView = new ImageView(mContext);
-            imageView.setLayoutParams(new GridView.LayoutParams(300, 256));
+            imageView.setLayoutParams(new GridView.LayoutParams(150, 128));
             imageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
             imageView.setPadding(8, 8, 8, 8);
         } else {
