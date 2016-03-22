@@ -90,6 +90,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 FoodConfiguration.FOOD_USER = dataSnapshot.getValue(FoodUser.class);
+                FoodConfiguration.USER_ID = uid;
                 showLoggedInView(uid);
             }
 

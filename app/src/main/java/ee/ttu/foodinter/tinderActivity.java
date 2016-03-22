@@ -8,6 +8,7 @@ import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.util.Base64;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -41,8 +42,29 @@ public class TinderActivity extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        //setRetainInstance(true);
 
 
+    }
+
+
+    @Override
+    public void onResume() {
+        super.onResume();
+
+        getView().setFocusableInTouchMode(true);
+        getView().requestFocus();
+        getView().setOnKeyListener(new View.OnKeyListener() {
+            @Override
+            public boolean onKey(View v, int keyCode, KeyEvent event) {
+                if (event.getAction() == KeyEvent.ACTION_UP && keyCode == KeyEvent.KEYCODE_BACK) {
+                    // handle back button's click listener
+                    //Toast.makeText(getActivity(), "Back press", Toast.LENGTH_SHORT).show();
+                    return true;
+                }
+                return false;
+            }
+        });
     }
 
     @Override
@@ -63,9 +85,9 @@ public class TinderActivity extends Fragment {
                     foodCards.add(foodCard);
 
                     //TODO: remove comments when ready
-                    /*if (!FoodConfiguration.USER_ID.equals(foodCard.getUserId())){
+                    if (!FoodConfiguration.USER_ID.equals(foodCard.getUserId())){
                         foodCards.add(foodCard);
-                    }*/
+                    }
                 }
                 parseFoodCardsIntoPlaces(foodCards);
             }
@@ -143,6 +165,8 @@ public class TinderActivity extends Fragment {
             }
         });
 
+
+
         return view;
     }
 
@@ -155,7 +179,13 @@ public class TinderActivity extends Fragment {
                     inList = true;
                 }
             }
-            //TODO: userfoodcard iteration to check what user has
+            //TODO: uncomment when ready
+            for (String placeName :
+                    FoodConfiguration.FOOD_USER.getPlaceNames()) {
+                if (foodCard.getPlaceName().equals(placeName)) {
+                    inList = true;
+                }
+            }
             if (!inList) {
                 places.add(foodCard);
             }
@@ -183,6 +213,7 @@ public class TinderActivity extends Fragment {
 
     private void addPlace(String placeName) {
         ArrayList<String> placeNames = FoodConfiguration.FOOD_USER.getPlaceNames();
+        Log.d("lammas", "place names "+placeNames);
         boolean inList = false;
         for (String place : placeNames) {
             if (place.equals(placeName)) {
@@ -192,6 +223,8 @@ public class TinderActivity extends Fragment {
         if (!inList) {
             placeNames.add(placeName);
         }
+        Log.d("lammas", "place names place added"+placeNames);
+
         FoodConfiguration.FOOD_USER.setPlaceNames(placeNames);
         firebase.child("FoodUsers/"+FoodConfiguration.FOOD_USER.getUid()).setValue(FoodConfiguration.FOOD_USER);
     }
@@ -209,6 +242,7 @@ public class TinderActivity extends Fragment {
     public void left() {
         flingContainer.getTopCardListener().selectLeft();
     }
+
 
 
     private void showAlerBox() {

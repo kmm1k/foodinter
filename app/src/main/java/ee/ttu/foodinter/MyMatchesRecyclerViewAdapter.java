@@ -36,6 +36,7 @@ public class MyMatchesRecyclerViewAdapter extends RecyclerView.Adapter<MyMatches
     @Override
     public void onBindViewHolder(final ViewHolder holder, int position) {
         holder.mItem = mValues.get(position);
+        holder.mItemtext = mValues.get(position);
         //holder.mIdView.setText(position+1);
         holder.mContentView.setText(mValues.get(position));
 
@@ -61,6 +62,7 @@ public class MyMatchesRecyclerViewAdapter extends RecyclerView.Adapter<MyMatches
         public final TextView mIdView;
         public final TextView mContentView;
         public String mItem;
+        public String mItemtext;
 
         public ViewHolder(View view) {
             super(view);

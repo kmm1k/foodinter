@@ -8,7 +8,7 @@
         android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceLarge"
         android:text="name"
-        android:id="@+id/place_name"
+        android:id="@+id/place_info"
         android:layout_gravity="center_horizontal" />
 
     <TextView

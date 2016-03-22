@@ -22,13 +22,13 @@
         <activity
             android:name=".LoggedInActivity"
             android:label="@string/title_activity_logged_in"
-            android:theme="@style/AppTheme.NoActionBar">
-        </activity>
+            android:theme="@style/AppTheme.NoActionBar"></activity>
         <activity
             android:name=".DrawerActivity"
             android:label="@string/title_activity_drawer"
-            android:theme="@style/AppTheme.NoActionBar">
-        </activity>
+            android:configChanges="orientation|screenSize"
+            android:theme="@style/AppTheme.NoActionBar"/>
+        <activity android:name=".MatchActivity"></activity>
     </application>
 
 </manifest>

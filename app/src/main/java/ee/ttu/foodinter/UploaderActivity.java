@@ -20,6 +20,7 @@ import android.support.v4.app.Fragment;
 import android.text.InputType;
 import android.util.Base64;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -28,6 +29,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.GridView;
 import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.firebase.client.DataSnapshot;
@@ -64,18 +66,38 @@ public class UploaderActivity extends Fragment implements
     private String mLongitudeText;
     private String strJson = "";
     Bitmap image;
+    TextView userInfo;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
+        setRetainInstance(true);
     }
 
+    @Override
+    public void onResume() {
+        super.onResume();
+
+        getView().setFocusableInTouchMode(true);
+        getView().requestFocus();
+        getView().setOnKeyListener(new View.OnKeyListener() {
+            @Override
+            public boolean onKey(View v, int keyCode, KeyEvent event) {
+                if (event.getAction() == KeyEvent.ACTION_UP && keyCode == KeyEvent.KEYCODE_BACK) {
+                    // handle back button's click listener
+                    //Toast.makeText(getActivity(), "Back press", Toast.LENGTH_SHORT).show();
+                    return true;
+                }
+                return false;
+            }
+        });
+    }
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
 
         final View view = inflater.inflate(R.layout.activity_uploader, container, false);
+        userInfo = (TextView) view.findViewById(R.id.user_info);
         ButterKnife.bind(this, view);
         button1.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -88,7 +110,7 @@ public class UploaderActivity extends Fragment implements
         preview = (ImageView) view.findViewById(R.id.imageView);
         firebase = new Firebase(FoodConfiguration.SERVER_ADDRESS);
         final GridView gridview = (GridView) view.findViewById(R.id.gridview);
-
+        userInfo.setText(FoodConfiguration.FOOD_USER.getUserName());
 
 
         firebase.child("FoodCards").addValueEventListener(new ValueEventListener() {
