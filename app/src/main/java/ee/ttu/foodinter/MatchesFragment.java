@@ -11,6 +11,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import java.util.ArrayList;
+
 /**
  * A fragment representing a list of Items.
  * <p/>
@@ -67,9 +69,17 @@ public class MatchesFragment extends Fragment {
                 recyclerView.setLayoutManager(new GridLayoutManager(context, mColumnCount));
             }
             Log.d("lammas", ""+FoodConfiguration.FOOD_USER.getPlaceNames());
-            recyclerView.setAdapter(new MyMatchesRecyclerViewAdapter(FoodConfiguration.FOOD_USER.getPlaceNames(), mListener));
+            ArrayList<String> places = cloneList(FoodConfiguration.FOOD_USER.getPlaceNames());
+            places.remove(0);
+            recyclerView.setAdapter(new MyMatchesRecyclerViewAdapter(places, mListener));
         }
         return view;
+    }
+
+    public static ArrayList<String> cloneList(ArrayList<String> list) {
+        ArrayList<String> clone = new ArrayList<String>(list.size());
+        for(String item: list) clone.add(item);
+        return clone;
     }
 
 
