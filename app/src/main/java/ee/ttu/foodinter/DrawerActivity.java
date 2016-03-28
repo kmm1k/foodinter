@@ -1,6 +1,8 @@
 package ee.ttu.foodinter;
 
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.location.Location;
 import android.net.Uri;
 import android.os.Bundle;
@@ -27,6 +29,7 @@ public class DrawerActivity extends AppCompatActivity
     private Location mLastLocation;
     private BreakIterator mLatitudeText;
     private BreakIterator mLongitudeText;
+    private UserDBHelper userDBHelper;
 
     @Override
     protected void onRestoreInstanceState(Bundle savedInstanceState) {
@@ -41,6 +44,15 @@ public class DrawerActivity extends AppCompatActivity
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
+        userDBHelper = new UserDBHelper(this);
+        String pageId= null;
+        try{
+            pageId = getIntent().getStringExtra("page_id");
+        } catch (Exception e) {
+
+        }
+
+
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
@@ -54,18 +66,23 @@ public class DrawerActivity extends AppCompatActivity
 
 
 
-        Fragment fragment = null;
+        if (pageId != null) {
+            switchFragment(Integer.parseInt(pageId));
+        }else {
+            Fragment fragment = null;
 
 
-        Class fragmentClass = TinderActivity.class;
-        try {
-            fragment = (Fragment) fragmentClass.newInstance();
-        } catch (Exception e) {
-            e.printStackTrace();
+            Class fragmentClass = TinderActivity.class;
+            try {
+                fragment = (Fragment) fragmentClass.newInstance();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+            FragmentManager fragmentManager = getSupportFragmentManager();
+            fragmentManager.beginTransaction().replace(R.id.flContent, fragment).commit();
         }
 
-        FragmentManager fragmentManager = getSupportFragmentManager();
-        fragmentManager.beginTransaction().replace(R.id.flContent, fragment).commit();
 
 
     }
@@ -108,16 +125,42 @@ public class DrawerActivity extends AppCompatActivity
     public boolean onNavigationItemSelected(MenuItem item) {
         // Handle navigation view item clicks here.
         int id = item.getItemId();
+        switchFragment(id);
+
+        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        drawer.closeDrawer(GravityCompat.START);
+        return true;
+    }
+
+    private void switchFragment(int id) {
         Fragment fragment = null;
 
 
-        Class fragmentClass;
+        Class fragmentClass = null;
         if (id == R.id.nav_tinder) {
+            //userDBHelper.updatePageId(R.id.nav_tinder);
+            SharedPreferences sharedpreferences = getSharedPreferences("MyPrefs", Context.MODE_PRIVATE);
+            SharedPreferences.Editor editor = sharedpreferences.edit();
+            editor.putInt(getString(R.string.saved_page_id), R.id.nav_tinder);
+            editor.commit();
             fragmentClass = TinderActivity.class;
         } else if (id == R.id.nav_matches) {
+            //userDBHelper.updatePageId(R.id.nav_matches);
+            SharedPreferences sharedpreferences = getSharedPreferences("MyPrefs", Context.MODE_PRIVATE);
+            SharedPreferences.Editor editor = sharedpreferences.edit();
+            editor.putInt(getString(R.string.saved_page_id), R.id.nav_matches);
+            editor.commit();
             fragmentClass = MatchesFragment.class;
         } else if (id == R.id.nav_profile) {
+            SharedPreferences sharedpreferences = getSharedPreferences("MyPrefs", Context.MODE_PRIVATE);
+            SharedPreferences.Editor editor = sharedpreferences.edit();
+            editor.putInt(getString(R.string.saved_page_id), R.id.nav_profile);
+            editor.commit();
             fragmentClass = UploaderActivity.class;
+        } else if (id == R.id.nav_log_out){
+            userDBHelper.deleteDatabase();
+            finish();
+            return;
         } else {
             fragmentClass = TinderFragment.class;
         }
@@ -130,10 +173,6 @@ public class DrawerActivity extends AppCompatActivity
 
         FragmentManager fragmentManager = getSupportFragmentManager();
         fragmentManager.beginTransaction().replace(R.id.flContent, fragment).commit();
-
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        drawer.closeDrawer(GravityCompat.START);
-        return true;
     }
 
     @Override
