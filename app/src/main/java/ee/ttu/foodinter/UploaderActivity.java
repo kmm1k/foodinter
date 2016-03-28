@@ -137,7 +137,11 @@ public class UploaderActivity extends Fragment implements
                 gridview.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                     public void onItemClick(AdapterView<?> parent, View v,
                                             int position, long id) {
-                        deleteImageDialog(foodCardKeys.get(position), foodCards.get(position));
+                        Intent intent = new Intent(getContext(), ImageSingleActivity.class);
+                        intent.putExtra("place",  foodCards.get(position));
+                        intent.putExtra("key",  foodCardKeys.get(position));
+                        startActivity(intent);
+                        //deleteImageDialog(foodCardKeys.get(position), foodCards.get(position));
                     }
                 });
             }
@@ -163,7 +167,10 @@ public class UploaderActivity extends Fragment implements
     private void deleteImageDialog(final String foodCardKey, final FoodCard foodCard) {
         final String[] items = {"delete food", "cancel"};
 
-
+        ImageView image = new ImageView(getActivity());
+        image.setImageBitmap(stringToBitmap(foodCard.getImage()));
+        image.setMinimumHeight(200);
+        image.setMinimumWidth(200);
 
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         builder.setTitle(foodCard.getPlaceName());
@@ -177,7 +184,8 @@ public class UploaderActivity extends Fragment implements
                     public void onClick(DialogInterface dialog, int id) {
                         firebase.child("FoodCards").child(foodCardKey).removeValue();
                     }
-                });
+                }).
+        setView(image);
         // Create the AlertDialog object and return it
         builder.show();
 
@@ -236,6 +244,7 @@ public class UploaderActivity extends Fragment implements
                 Log.d("lammas", ""+imagePath);
                 image = BitmapFactory.decodeFile(imagePath);
                 //preview.setImageBitmap(image);
+                Log.d("lammas", ""+image.getByteCount());
                 //addImageToDatabaseWithInfo();
             }
         }

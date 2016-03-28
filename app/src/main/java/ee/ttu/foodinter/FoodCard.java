@@ -1,6 +1,8 @@
 package ee.ttu.foodinter;
 
 import android.graphics.Bitmap;
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.util.Base64;
 
 import java.io.ByteArrayOutputStream;
@@ -8,7 +10,7 @@ import java.io.ByteArrayOutputStream;
 /**
  * Created by kmm on 16.03.2016.
  */
-public class FoodCard {
+public class FoodCard implements Parcelable {
     private String userId;
     private String image; //Base64
     private String placeName;
@@ -59,4 +61,37 @@ public class FoodCard {
     public void setPlaceInfo(String placeInfo) {
         this.placeInfo = placeInfo;
     }
+
+    protected FoodCard(Parcel in) {
+        userId = in.readString();
+        image = in.readString();
+        placeName = in.readString();
+        placeInfo = in.readString();
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(userId);
+        dest.writeString(image);
+        dest.writeString(placeName);
+        dest.writeString(placeInfo);
+    }
+
+    @SuppressWarnings("unused")
+    public static final Parcelable.Creator<FoodCard> CREATOR = new Parcelable.Creator<FoodCard>() {
+        @Override
+        public FoodCard createFromParcel(Parcel in) {
+            return new FoodCard(in);
+        }
+
+        @Override
+        public FoodCard[] newArray(int size) {
+            return new FoodCard[size];
+        }
+    };
 }

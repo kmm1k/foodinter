@@ -1,5 +1,6 @@
 package ee.ttu.foodinter;
 
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
@@ -8,6 +9,7 @@ import android.util.Base64;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
+import android.widget.Button;
 import android.widget.GridView;
 import android.widget.TextView;
 
@@ -23,6 +25,7 @@ public class MatchActivity extends AppCompatActivity {
     private String placeName;
     TextView placeNameText;
     TextView placeInfoText;
+    Button deleteMatchButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -30,6 +33,7 @@ public class MatchActivity extends AppCompatActivity {
         setContentView(R.layout.activity_match);
         placeNameText = (TextView) this.findViewById(R.id.place_name);
         placeInfoText = (TextView) this.findViewById(R.id.place_info);
+        deleteMatchButton = (Button) this.findViewById(R.id.delete_match);
 
         placeName = getIntent().getStringExtra("name");
 
@@ -60,15 +64,51 @@ public class MatchActivity extends AppCompatActivity {
                 gridview.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                     public void onItemClick(AdapterView<?> parent, View v,
                                             int position, long id) {
-
+                        Intent intent = new Intent(getBaseContext(), ImageSingleActivity.class);
+                        intent.putExtra("place",  foodCards.get(position));
+                        intent.putExtra("position",  position);
+                        startActivity(intent);
                     }
                 });
+                boolean matchIsSet = false;
+                for (String placeName: FoodConfiguration.FOOD_USER.getPlaceNames()) {
+                    if (placeName.equals(foodCards.get(0).getPlaceName())) {
+                        matchIsSet = true;
+                    }
+                }
+                if (matchIsSet) {
+                    deleteMatchButton.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            int position = 0;
+                            for (String placeName: FoodConfiguration.FOOD_USER.getPlaceNames()) {
+                                if (placeName.equals(foodCards.get(0).getPlaceName())) {
+                                    break;
+                                }
+                                position++;
+                            }
+                            ArrayList<String> placeNames = FoodConfiguration.FOOD_USER.getPlaceNames();
+                            placeNames.remove(position);
+                            firebase.child("FoodUsers").child(FoodConfiguration.USER_ID).child("placeNames").setValue(placeNames);
+
+                        }
+                    });
+                } else {
+                    deleteMatchButton.setText("Go Back");
+                    deleteMatchButton.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            finish();
+                        }
+                    });
+                }
             }
 
             @Override
             public void onCancelled(FirebaseError firebaseError) {
                 Log.d("lammas", "failed to get info from db");
             }
+
         });
     }
 
