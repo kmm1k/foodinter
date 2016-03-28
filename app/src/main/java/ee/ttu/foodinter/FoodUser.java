@@ -10,11 +10,13 @@ public class FoodUser {
     private String uid;
     private String userName;
     private ArrayList<String> placeNames;
+    private ArrayList<String> deniedNames;
 
-    public FoodUser(String userName, String uid, ArrayList placeNames) {
+    public FoodUser(String userName, String uid, ArrayList placeNames, ArrayList deniedNames) {
         this.userName = userName;
         this.uid = uid;
         this.placeNames = placeNames;
+        this.deniedNames = deniedNames;
     }
 
     private FoodUser() {
@@ -43,5 +45,13 @@ public class FoodUser {
 
     public void setPlaceNames(ArrayList<String> placeNames) {
         this.placeNames = placeNames;
+    }
+
+    public ArrayList<String> getDeniedNames() {
+        return deniedNames;
+    }
+
+    public void setDeniedNames(ArrayList<String> deniedNames) {
+        this.deniedNames = deniedNames;
     }
 }

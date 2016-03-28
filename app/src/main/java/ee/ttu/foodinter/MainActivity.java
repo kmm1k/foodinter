@@ -81,7 +81,9 @@ public class MainActivity extends AppCompatActivity {
     private void addFoodUser(String userName, String uid) {
         ArrayList<String> places = new ArrayList<>();
         places.add("item");
-        FoodUser foodUser = new FoodUser(userName, uid, places);
+        ArrayList<String> deniedPlaces = new ArrayList<>();
+        deniedPlaces.add("item");
+        FoodUser foodUser = new FoodUser(userName, uid, places, deniedPlaces);
         firebase.child("FoodUsers/"+uid).setValue(foodUser);
     }
 

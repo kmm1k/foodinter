@@ -89,9 +89,17 @@ public class TinderActivity extends Fragment {
                     Log.d("lammas", foodCardSnapshot.getKey());
                     //foodCards.add(foodCard);
 
-                    //TODO: remove comments when ready
                     if (!FoodConfiguration.USER_ID.equals(foodCard.getUserId())){
-                        foodCards.add(foodCard);
+                        boolean isDenied = false;
+                        for (String deniedPlace :
+                                FoodConfiguration.FOOD_USER.getDeniedNames()) {
+                            if (deniedPlace.equals(foodCard.getPlaceName())){
+                                isDenied = true;
+                            }
+                        }
+                        if (!isDenied) {
+                            foodCards.add(foodCard);
+                        }
                     }
                 }
                 if (FoodConfiguration.swiped) {
@@ -140,6 +148,7 @@ public class TinderActivity extends Fragment {
                 //You also have access to the original object.
                 //If you want to use it just cast it (String) dataObject
                 //makeToast(TinderActivity.this, "Left!");
+                denyPlace(places.get(i).getPlaceName());
                 i++;
             }
 
@@ -217,6 +226,7 @@ public class TinderActivity extends Fragment {
         }
 
     }
+
     private Bitmap stringToBitmap (String imageString) {
         Bitmap imageBitmap = null;
         byte[] decodedString = Base64.decode(imageString, Base64.DEFAULT);
@@ -224,7 +234,6 @@ public class TinderActivity extends Fragment {
         //preview.setImageBitmap(imageBitmap);
         return imageBitmap;
     }
-
     private void addPlace(String placeName) {
         ArrayList<String> placeNames = FoodConfiguration.FOOD_USER.getPlaceNames();
         Log.d("lammas", "place names "+placeNames);
@@ -240,6 +249,23 @@ public class TinderActivity extends Fragment {
         Log.d("lammas", "place names place added"+placeNames);
         swipedPlaceName = placeName;
         FoodConfiguration.FOOD_USER.setPlaceNames(placeNames);
+        firebase.child("FoodUsers/"+FoodConfiguration.FOOD_USER.getUid()).setValue(FoodConfiguration.FOOD_USER);
+    }
+
+    private void denyPlace(String placeName) {
+        ArrayList<String> deniedNames = FoodConfiguration.FOOD_USER.getDeniedNames();
+        Log.d("lammas", "deny place names "+deniedNames);
+        boolean inList = false;
+        for (String place : deniedNames) {
+            if (place.equals(placeName)) {
+                inList = true;
+            }
+        }
+        if (!inList) {
+            deniedNames.add(placeName);
+        }
+        Log.d("lammas", "deny place names place added"+deniedNames);
+        FoodConfiguration.FOOD_USER.setDeniedNames(deniedNames);
         firebase.child("FoodUsers/"+FoodConfiguration.FOOD_USER.getUid()).setValue(FoodConfiguration.FOOD_USER);
     }
 
